@@ -1,0 +1,21 @@
+{
+    "name": "krzysztofzylka/price",
+    "description": "Price library",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Krzysztofzylka\\Price\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Krzysztof Zylka",
+            "email": "krzysztofzylka@yahoo.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=7.4"
+    }
+}
