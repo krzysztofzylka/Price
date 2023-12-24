@@ -5,6 +5,8 @@ namespace Krzysztofzylka\Price\Math;
 class Math
 {
 
+    public static int $scale = 2;
+
     /**
      * Add
      * @param $a
@@ -13,6 +15,10 @@ class Math
      */
     public static function add($a, $b)
     {
+        if (extension_loaded('bcmath')) {
+            return bcadd($a, $b, self::$scale);
+        }
+
         return $a + $b;
     }
 
@@ -24,6 +30,10 @@ class Math
      */
     public static function subtract($a, $b)
     {
+        if (extension_loaded('bcmath')) {
+            return bcsub($a, $b, self::$scale);
+        }
+
         return $a - $b;
     }
 
@@ -35,6 +45,10 @@ class Math
      */
     public static function multiply($a, $b)
     {
+        if (extension_loaded('bcmath')) {
+            return bcmul($a, $b, self::$scale);
+        }
+
         return $a * $b;
     }
 
@@ -46,6 +60,10 @@ class Math
      */
     public static function divide($a, $b)
     {
+        if (extension_loaded('bcmath')) {
+            return bcdiv($a, $b, self::$scale);
+        }
+
         return $a / $b;
     }
 
