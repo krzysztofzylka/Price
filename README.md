@@ -17,17 +17,17 @@ $price = new \Krzysztofzylka\Price\Price(100);
 ### Add tax rate
 Add 23% tax rate
 ```php
-$price->addTaxRate(23);
+$price->plusTaxRate(23);
 ```
 ### Add price
 Add 150.00 price
 ```php
-$price->addPrice(150);
+$price->plus(150);
 ```
 ### Subtract price
 Subtract 100 price
 ```php
-$price->subtractPrice(100);
+$price->minus(100);
 ```
 ### Get amount
 ```php
@@ -36,7 +36,7 @@ echo $price->getAmount();
 ```
 ### Get format amount
 ```php
-echo $price->getAmount('EUR');
+echo $price->getFormatAmount('EUR');
 //173,00 EUR
 ```
 ## Calculate

@@ -2,7 +2,12 @@
 
 namespace Krzysztofzylka\Price;
 
-use Krzysztofzylka\Price\Math\Math;
+use Brick\Math\BigDecimal;
+use Brick\Math\BigNumber;
+use Brick\Math\Exception\DivisionByZeroException;
+use Brick\Math\Exception\MathException;
+use Brick\Math\Exception\NumberFormatException;
+use Brick\Math\RoundingMode;
 
 class Price
 {
@@ -14,69 +19,120 @@ class Price
     public static ?string $currency = null;
 
     /**
-     * Price
-     * @var float
+     * Amount
+     * @var BigDecimal
      */
-    private float $price = 0;
+    protected BigDecimal $amount;
 
     /**
-     * Create price
-     * @param float|int $price
+     * Create price instance
+     * @param Price|BigNumber|int|float|string|null $amount
+     * @throws DivisionByZeroException
+     * @throws NumberFormatException
      */
-    public function __construct($price = 0)
+    protected function __construct(Price|BigNumber|int|float|string|null $amount = 0)
     {
-        $this->addPrice($price);
+        $this->fixInputAmount($amount);
+
+        $this->amount = BigDecimal::of($amount);
+    }
+
+    /**
+     * Fix input amount
+     * @param $amount
+     * @return void
+     */
+    private function fixInputAmount(&$amount): void
+    {
+        if (empty($amount)) {
+            $amount = 0;
+        } elseif ($amount instanceof Price) {
+            $amount = $amount->getAmount();
+        }
+    }
+
+    /**
+     * Creates a new Price instance with the given amount.
+     * @param Price|BigNumber|int|float|string|null $amount The amount used to create the Price instance.
+     * @return Price The newly created Price instance.
+     * @throws DivisionByZeroException
+     * @throws NumberFormatException
+     */
+    public static function of(Price|BigNumber|int|float|string|null $amount): Price
+    {
+        return new Price($amount);
+    }
+
+    /**
+     * Retrieves the amount of the Price instance.
+     * @return float The amount of the Price instance.
+     */
+    public function getAmount(): float
+    {
+        return $this->amount->toFloat();
+    }
+
+    /**
+     * Returns the formatted amount with the given currency.
+     * @param string|null $currency The currency code used for formatting the amount. If null, it uses the default currency.
+     * @return string The formatted amount with the specified currency.
+     */
+    public function getFormatAmount(string $currency = null): string
+    {
+        return number_format(
+            $this->getAmount(),
+            2,
+            ',',
+            ' '
+        ) . ($currency ? (' ' . $currency) : '');
+    }
+
+    /**
+     * Adds the specified amount to the current Price instance.
+     * @param Price|BigNumber|int|float|string|null $amount The amount to be added to the Price instance.
+     * @return self The updated Price instance after the addition.
+     * @throws DivisionByZeroException If the division by zero occurs while performing the addition.
+     * @throws NumberFormatException|MathException If the amount is not in a valid numeric format.
+     */
+    public function plus(Price|BigNumber|int|float|string|null $amount): self
+    {
+        $this->fixInputAmount($amount);
+        $this->amount = $this->amount->plus($amount);
+
+        return $this;
+    }
+
+    /**
+     * Subtracts the given amount from the current Price instance.
+     * @param Price|BigNumber|int|float|string|null $amount The amount to subtract from the current Price instance.
+     * @return self The current Price instance after subtracting the amount.
+     * @throws MathException
+     */
+    public function minus(Price|BigNumber|int|float|string|null $amount): self
+    {
+        $this->fixInputAmount($amount);
+        $this->amount = $this->amount->minus($amount);
+
+        return $this;
     }
 
     /**
      * Add tax rate
      * @param int $tax
-     * @return void
+     * @return Price
+     * @throws DivisionByZeroException
+     * @throws MathException
+     * @throws NumberFormatException
      */
-    public function addTaxRate(int $tax)
+    public function plusTaxRate(int $tax): self
     {
-        $taxPrice = Math::multiply($this->price, Math::divide($tax, 100));
+        $taxPrice = BigDecimal::of($this->amount)->multipliedBy(
+            BigDecimal::of($tax)->dividedBy(100, 2, RoundingMode::HALF_UP)
+        );
 
-        $this->price = Math::add($this->price, $taxPrice);
-    }
+        $this->plus($taxPrice);
 
-    /**
-     * Add tax rate
-     * @param int|float $price
-     * @return void
-     */
-    public function addPrice(float $price)
-    {
-        $this->price = Math::add($this->price, $price);
-    }
-
-    /**
-     * Subtract price
-     * @param int|float $price
-     * @return void
-     */
-    public function subtractPrice($price)
-    {
-        $this->price = Math::subtract($this->price, $price);
-    }
-
-    /**
-     * Get amount
-     * @return float
-     */
-    public function getAmount(): float
-    {
-        return $this->price;
-    }
-
-    /**
-     * Get amount
-     * @param string|null $currency
-     * @return string
-     */
-    public function getFormatAmount(string $currency = null): string
-    {
-        return Calculate::formatAmount($this->price, $currency ?? self::$currency ?? '');
+        return $this;
     }
 
 }

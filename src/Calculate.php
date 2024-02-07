@@ -11,7 +11,8 @@ class Calculate
      * @param string $currency
      * @return string
      */
-    public static function formatAmount(float $amount, string $currency = 'PLN') : string {
+    public static function formatAmount(float $amount, string $currency = 'PLN'): string
+    {
         return number_format($amount, 2, ',', ' ') . ($currency ? (' ' . $currency) : '');
     }
 
@@ -21,7 +22,8 @@ class Calculate
      * @param float $vat
      * @return float
      */
-    public static function calculateVatAmount(float $amount, float $vat) : float {
+    public static function calculateVatAmount(float $amount, float $vat): float
+    {
         return $amount * ($vat / 100);
     }
 
@@ -31,7 +33,8 @@ class Calculate
      * @param float $vatRate
      * @return float
      */
-    public static function calculateNetAmount(float $grossAmount, float $vatRate) : float {
+    public static function calculateNetAmount(float $grossAmount, float $vatRate): float
+    {
         return $grossAmount / (1 + ($vatRate / 100));
     }
 
@@ -41,7 +44,8 @@ class Calculate
      * @param float $vatRate
      * @return float
      */
-    public static function calculateGrossAmount(float $netAmount, float $vatRate) : float {
+    public static function calculateGrossAmount(float $netAmount, float $vatRate): float
+    {
         return $netAmount * (1 + ($vatRate / 100));
     }
 
