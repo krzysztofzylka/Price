@@ -12,7 +12,7 @@ composer require krzysztofzylka/price
 ### Initialize
 Initialize with 50.00
 ```php
-$price = new \Krzysztofzylka\Price\Price(100);
+$price = \Krzysztofzylka\Price\Price::of(50)
 ```
 ### Add tax rate
 Add 23% tax rate
