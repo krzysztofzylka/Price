@@ -2,137 +2,93 @@
 
 namespace Krzysztofzylka\Price;
 
-use Brick\Math\BigDecimal;
-use Brick\Math\BigNumber;
-use Brick\Math\Exception\DivisionByZeroException;
-use Brick\Math\Exception\MathException;
-use Brick\Math\Exception\NumberFormatException;
-use Brick\Math\RoundingMode;
-
+/**
+ * Class Price
+ * Handles the formatting and representation of monetary values.
+ */
 class Price
 {
 
-    /**
-     * Global default currency
-     * @var string|null
-     */
-    public static ?string $currency = null;
+    /** @var string|null Currency symbol, e.g., 'PLN', 'USD'. */
+    private ?string $currency = null;
+
+    /** @var BigInteger The amount in the smallest currency unit (e.g., cents, grosze). */
+    private BigInteger $amount;
+
+    /** @var BigInteger The number of decimal places to display. */
+    private BigInteger $decimal = 2;
 
     /**
-     * Amount
-     * @var BigDecimal
+     * Static price constructor.
+     * @param BigInteger $amount The amount in the smallest currency unit.
+     * @param string|null $currency Optional currency symbol.
+     * @param BigInteger $decimal Optional number of decimal places (default: 2).
      */
-    protected BigDecimal $amount;
-
-    /**
-     * Create price instance
-     * @param Price|BigNumber|int|float|string|null $amount
-     * @throws DivisionByZeroException
-     * @throws NumberFormatException
-     */
-    protected function __construct(Price|BigNumber|int|float|string|null $amount = 0)
+    public static function of(BigInteger $amount, ?string $currency = null, BigInteger $decimal = 2): Price
     {
-        $this->fixInputAmount($amount);
-
-        $this->amount = BigDecimal::of($amount);
+        return new self($amount, $currency, $decimal);
     }
 
     /**
-     * Fix input amount
-     * @param $amount
-     * @return void
+     * Price constructor.
+     * @param BigInteger $amount The amount in the smallest currency unit.
+     * @param string|null $currency Optional currency symbol.
+     * @param BigInteger $decimal Optional number of decimal places (default: 2).
      */
-    private function fixInputAmount(&$amount): void
+    public function __construct(BigInteger $amount, ?string $currency = null, BigInteger $decimal = 2)
     {
-        if (empty($amount)) {
-            $amount = 0;
-        } elseif ($amount instanceof Price) {
-            $amount = $amount->getAmount();
-        }
+        $this->amount = $amount;
+        $this->decimal = $decimal;
+        $this->currency = $currency;
     }
 
-    /**
-     * Creates a new Price instance with the given amount.
-     * @param Price|BigNumber|int|float|string|null $amount The amount used to create the Price instance.
-     * @return Price The newly created Price instance.
-     * @throws DivisionByZeroException
-     * @throws NumberFormatException
-     */
-    public static function of(Price|BigNumber|int|float|string|null $amount): Price
+    public function setDecimal(BigInteger $decimal): self
     {
-        return new Price($amount);
-    }
-
-    /**
-     * Retrieves the amount of the Price instance.
-     * @return float The amount of the Price instance.
-     */
-    public function getAmount(): float
-    {
-        return $this->amount->toFloat();
-    }
-
-    /**
-     * Returns the formatted amount with the given currency.
-     * @param string|null $currency The currency code used for formatting the amount. If null, it uses the default currency.
-     * @return string The formatted amount with the specified currency.
-     */
-    public function getFormatAmount(string $currency = null): string
-    {
-        return number_format(
-            $this->getAmount(),
-            2,
-            ',',
-            ' '
-        ) . ($currency ? (' ' . $currency) : '');
-    }
-
-    /**
-     * Adds the specified amount to the current Price instance.
-     * @param Price|BigNumber|int|float|string|null $amount The amount to be added to the Price instance.
-     * @return self The updated Price instance after the addition.
-     * @throws DivisionByZeroException If the division by zero occurs while performing the addition.
-     * @throws NumberFormatException|MathException If the amount is not in a valid numeric format.
-     */
-    public function plus(Price|BigNumber|int|float|string|null $amount): self
-    {
-        $this->fixInputAmount($amount);
-        $this->amount = $this->amount->plus($amount);
+        $this->decimal = $decimal;
 
         return $this;
     }
 
     /**
-     * Subtracts the given amount from the current Price instance.
-     * @param Price|BigNumber|int|float|string|null $amount The amount to subtract from the current Price instance.
-     * @return self The current Price instance after subtracting the amount.
-     * @throws MathException
+     * Set currency symbol.
+     * @param string $currency The currency symbol to set.
+     * @return self Returns the current instance for method chaining.
      */
-    public function minus(Price|BigNumber|int|float|string|null $amount): self
+    public function setCurrency(string $currency): self
     {
-        $this->fixInputAmount($amount);
-        $this->amount = $this->amount->minus($amount);
+        $this->currency = $currency;
 
         return $this;
     }
 
     /**
-     * Add tax rate
-     * @param int $tax
-     * @return Price
-     * @throws DivisionByZeroException
-     * @throws MathException
-     * @throws NumberFormatException
+     * Get formatted price.
+     * Formats the amount based on the specified decimal places and adds the currency symbol if set.
+     * @return string The formatted price string.
      */
-    public function plusTaxRate(int $tax): self
+    public function getFormattedPrice(): string
     {
-        $taxPrice = BigDecimal::of($this->amount)->multipliedBy(
-            BigDecimal::of($tax)->dividedBy(100, 2, RoundingMode::HALF_UP)
-        );
+        $divider = pow(10, $this->decimal);
+        $formatted = number_format($this->amount / $divider, $this->decimal, ',', '');
 
-        $this->plus($taxPrice);
+        return $this->currency ? $formatted . ' ' . $this->currency : $formatted;
+    }
 
-        return $this;
+    /**
+     * Convert a string or float amount to the smallest currency unit.
+     * @param string|float $value The value to convert (e.g., "123.44", "123,44", 123.44).
+     * @return self Returns the current instance for method chaining.
+     */
+    public function convertToAmount(string|float $value)
+    {
+        var_dump($value);
+        return 123;
+
+//        $floatValue = is_string($value) ? (float) str_replace(',', '.', $value) : $value;
+//        $multiplier = pow(10, $this->decimal);
+//        $this->amount = (int) floor($floatValue * $multiplier);
+
+//        return $this;
     }
 
 }
