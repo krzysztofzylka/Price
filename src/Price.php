@@ -138,7 +138,7 @@ class Price
     public function plusTaxRate(int $tax): self
     {
         $taxPrice = BigDecimal::of($this->amount)->multipliedBy(
-            BigDecimal::of($tax)->dividedBy(100, 2, RoundingMode::HALF_UP)
+            BigDecimal::of($tax)->dividedBy(100, 2, RoundingMode::HalfUp)
         );
 
         $this->plus($taxPrice);
